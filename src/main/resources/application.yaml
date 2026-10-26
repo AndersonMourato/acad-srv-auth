@@ -2,7 +2,13 @@ spring:
   application:
     name: acad-srv-auth
 
-  auth:
-    credentials:
-      username: ${AUTH_USERNAME:admin}
-      password: ${AUTH_PASSWORD:admin}
+auth:
+  credentials:
+    username: ${AUTH_USERNAME:admin}
+    password: ${AUTH_PASSWORD:admin}
+
+  jwt:
+    issuer: auth-service
+    expiration: 900
+    private-key: ${JWT_PRIVATE_KEY}
+    public-key: ${JWT_PUBLIC_KEY}
