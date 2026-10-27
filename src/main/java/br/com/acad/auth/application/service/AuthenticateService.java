@@ -5,6 +5,7 @@ import br.com.acad.auth.application.port.out.CredentialProviderPort;
 import br.com.acad.auth.application.port.out.TokenProviderPort;
 import br.com.acad.auth.domain.exception.InvalidCredentialsException;
 import br.com.acad.auth.domain.model.AuthenticationResult;
+import br.com.acad.auth.infrastructure.config.JwtProperties;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,13 +13,16 @@ public class AuthenticateService implements AuthenticateUseCase {
 
     private final CredentialProviderPort credentialProvider;
     private final TokenProviderPort tokenProvider;
+    private final JwtProperties jwtProperties;
 
     public AuthenticateService(
             CredentialProviderPort credentialProvider,
-            TokenProviderPort tokenProvider
+            TokenProviderPort tokenProvider,
+            JwtProperties jwtProperties
     ) {
         this.credentialProvider = credentialProvider;
         this.tokenProvider = tokenProvider;
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -38,7 +42,7 @@ public class AuthenticateService implements AuthenticateUseCase {
         return new AuthenticationResult(
                 accessToken,
                 "Bearer",
-                900
+                jwtProperties.expiration()
         );
     }
 }
