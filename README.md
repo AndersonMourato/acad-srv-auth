@@ -1,6 +1,18 @@
 # acad-srv-auth
 
-Microsserviço responsável pela autenticação de usuários e emissão de tokens JWT, desenvolvido com Java 21, Spring Boot 4 e arquitetura hexagonal.
+Microsserviço **acadêmico** responsável por autenticar usuários e emitir tokens JWT assinados (RS256), permitindo que os demais microsserviços do ecossistema validem esses tokens de forma independente, apenas com a chave pública — sem nunca ter acesso à chave privada de assinatura.
+
+Faz parte de um projeto de estudo com foco em arquitetura de microsserviços, Clean/Hexagonal Architecture e boas práticas de segurança com Spring Boot 4 e Java 21.
+
+## Documentação interativa (Swagger)
+
+A API é documentada via OpenAPI/Swagger e pode ser explorada diretamente pelo navegador:
+
+🔗 **Swagger UI (produção):** [https://acad-srv-auth-296926616938.europe-west1.run.app/swagger-ui.html](https://acad-srv-auth-296926616938.europe-west1.run.app/swagger-ui.html)
+
+📄 **OpenAPI JSON:** [https://acad-srv-auth-296926616938.europe-west1.run.app/v3/api-docs](https://acad-srv-auth-296926616938.europe-west1.run.app/v3/api-docs)
+
+Em ambiente local, a mesma documentação fica disponível em `http://localhost:8081/swagger-ui.html`.
 
 ## Tecnologias
 
@@ -17,7 +29,13 @@ Centralizar a autenticação e a emissão de tokens de acesso para outros micros
 
 ## Arquitetura
 
-O projeto utiliza arquitetura hexagonal (*Ports and Adapters*), separando as regras de aplicação dos detalhes de infraestrutura.
+O projeto utiliza **arquitetura hexagonal (Ports and Adapters)**, isolando as regras de negócio de detalhes de framework e infraestrutura. Essa escolha traz benefícios concretos para um serviço de autenticação central:
+
+- **Independência de infraestrutura:** o caso de uso `AuthenticateUseCase` não conhece Spring Security, JWT ou HTTP — apenas contratos (`CredentialProviderPort`, `TokenProviderPort`). Trocar o provedor de credenciais (ex.: de arquivo YAML para um banco de dados ou LDAP) ou o algoritmo de assinatura do token não exige alterar a regra de negócio.
+- **Testabilidade:** a camada de aplicação pode ser testada isoladamente, com *mocks* das portas de saída, sem subir contexto Spring ou gerar chaves reais.
+- **Segurança por padrão:** tokens são assinados com **RSA/RS256** (par de chaves assimétrico). Apenas este serviço guarda a chave privada; os demais microsserviços validam o token com a chave pública, sem nunca precisarem confiar segredos compartilhados.
+- **Stateless por design:** `SecurityConfig` desabilita sessão (`STATELESS`), reforçando que o serviço não mantém estado entre requisições — essencial para escalar horizontalmente em ambientes como Cloud Run.
+- **Documentação viva:** a API é autodescritiva via OpenAPI/Swagger, facilitando a integração dos times consumidores sem depender de documentação manual desatualizada.
 
 ```text
 br.com.acad.auth
