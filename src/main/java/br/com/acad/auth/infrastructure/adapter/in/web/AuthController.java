@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthenticateUseCase authenticateUseCase;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     public AuthController(AuthenticateUseCase authenticateUseCase) {
         this.authenticateUseCase = authenticateUseCase;
@@ -42,6 +45,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> generateToken(
             @Valid @RequestBody AuthRequest request) {
 
+        logger.info("Iniciando processo de autenticação.");
+
         AuthenticationResult result =
                 authenticateUseCase.authenticate(
                         request.username(),
@@ -53,6 +58,8 @@ public class AuthController {
                 result.tokenType(),
                 result.expiresIn()
         );
+
+        logger.info("Response finalizado com sucesso.");
 
         return ResponseEntity.ok(response);
     }
